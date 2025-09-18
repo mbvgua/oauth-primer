@@ -5,3 +5,8 @@
 
 # log files
 *.log
+
+# db file
+*.db
+
+TODO.md

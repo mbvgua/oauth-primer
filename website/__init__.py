@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_manager
+from authlib.integrations.flask_client import OAuth
 import os
 from dotenv import load_dotenv
 import logging
@@ -10,6 +11,7 @@ db = SQLAlchemy()
 db_name = "oauth.db"
 # disable werkzeugs auto logging. Too cluttered
 logger = logging.getLogger(__name__)
+app_oauth = OAuth()
 
 
 def create_app():
@@ -26,15 +28,13 @@ def create_app():
 
     # import & register various blueprints
     from .auth import auth
-
-    app.register_blueprint(auth, url_prefix="/auth/")
+    from .oauth import oauth
     from .views import views
-
-    app.register_blueprint(views, url_prefix="/")
-    # from .oauth import oauth
-    # app.register_blueprint(oauth, url_prefix="/oauth/")
     from .models import User
 
+    app.register_blueprint(auth, url_prefix="/auth")
+    app.register_blueprint(oauth, url_prefix="/oauth")
+    app.register_blueprint(views, url_prefix="/")
     create_database(app)
 
     # implement flask_login functionality
@@ -45,6 +45,15 @@ def create_app():
     login_manager.login_view = "auth.login"
     login_manager.login_message = "Oh no! You need to be logged in to access this page"
     login_manager.login_message_category = "warning"
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        """
+        check if use exists in db.
+        takes in user_id string and returns corresponding user object.
+        else none is returned
+        """
+        return User.query.get(user_id)
 
     # implement logging
     # levels = debug(10),info(20),warning(30),error(40),critical(50)
@@ -57,14 +66,8 @@ def create_app():
         datefmt="%B %d, %Y %H:%M:%S %Z",
     )
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        """
-        check if use exists in db.
-        takes in user_id string and returns corresponding user object.
-        else none is returned
-        """
-        return User.query.get(user_id)
+    # implement oauth
+    app_oauth.init_app(app)
 
     return app
 
