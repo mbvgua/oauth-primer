@@ -2,7 +2,7 @@ from flask import Flask, Blueprint, render_template, redirect, url_for, request,
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
-from . import db, logger
+from . import logger
 
 auth = Blueprint("auth", __name__)
 
@@ -24,10 +24,12 @@ def register():
             logger.warning(log_message)
             flash(message, category="danger")
         else:
-            new_user = User(
+            new_user = User.create(
+                id_="1232",
                 username=username,
                 email=email,
                 password=generate_password_hash(password),
+                profile_pic="https://imgs.search.brave.com/oevy2BhEY18zo9UPsMRKodku248XaHo-G0l7a5LcVmg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzYyLzAx/LzBkLzYyMDEwZDg0/OGI3OTBhMjMzNmQx/NTQyZmNkYTUxNzg5/LmpwZw",
             )
             message = (
                 f"Congratulations {username}! You have successfully created an account."
@@ -36,8 +38,7 @@ def register():
             logger.info(log_message)
             flash(message, category="success")
 
-            db.session.add(new_user)
-            db.session.commit()
+            User.create(id,username,email,profile_pic,password)
             login_user(new_user)
             return redirect(url_for("views.dashboard"))
 
@@ -53,7 +54,7 @@ def login():
         password = request.form.get("password")
 
         # search for user in db
-        user = User.query.filter_by(username=username).first()
+        user = User.get(email)
         if user:
             if check_password_hash(user.password, password):
                 message = f"Congratulations {username}! You have successfully logged in to your account."
@@ -81,4 +82,4 @@ def logout():
     log_message = f"{current_user.username} has logged out of their account"
     logger.info(log_message)
     logout_user()
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("views.home"))

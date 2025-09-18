@@ -1,15 +1,39 @@
 from flask_login import UserMixin
 from sqlalchemy.sql import func
-from . import db
 
-# from flask_login import UserMixin
-# from flask_sqlalchemy import SQLAlchemy
+from .db import get_db
 
 
-class User(db.Model, UserMixin):
-    __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(30), unique=True, nullable=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=True)
-    created_at = db.Column(db.DateTime(timezone=True), default=func.now())
+class User(UserMixin):
+    def __init__(self, id_, username, email, password, profile_pic) -> None:
+        self.id = id_
+        self.username = username
+        self.email = email
+        self.password = password
+        self.profile_pic = profile_pic
+
+        @staticmethod
+        def get(user_email):
+            db = get_db()
+            user = db.execute(
+                "SELECT * FROM users WHERE email=?;", (user_email).fetchone()
+            )
+            if not user:
+                return None
+
+            user = User(
+                id_=user[0],
+                username=user[1],
+                email=user[3],
+                password=user[4],
+                profile_pic=user[5],
+            )
+            return user
+
+        @staticmethod
+        def create(id_, username, email, password, profile_pic):
+            db = get_db()
+            db.execute(
+                "INSERT INTO users(id,username,email,password,profile_pic) VALUES (?,?,?,?,?);"
+            )
+            db.commit()
