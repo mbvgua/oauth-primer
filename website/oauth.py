@@ -1,7 +1,7 @@
 import os
 import json
 
-from flask import Blueprint, render_template, session, url_for, redirect, request
+from flask import Blueprint, flash, render_template, session, url_for, redirect, request
 from flask_login import current_user, login_user
 from oauthlib.oauth2 import WebApplicationClient
 import requests
@@ -41,8 +41,10 @@ def login():
         )
         return redirect(request_uri)
     except Exception as e:
-        logger.error(f"Error occurred during oauth login: {str(e)}")
-        return "Error occurred during login", 500
+        message = f"Error occurred during oauth login: {str(e)}"
+        logger.error(message)
+        flash(message, category="danger")
+        return redirect(url_for("views.home"))
 
 
 @oauth.route("/login/google/callback", methods=["GET", "POST"])
@@ -87,7 +89,10 @@ def authorize_google():
         users_picture = userinfo_response.json()["picture"]
         users_name = userinfo_response.json()["given_name"]
     else:
-        return "User email not available or not verified by Google.", 400
+        message = "User email not available or not verified by Google."
+        logger.warning(message)
+        flash(message, category="warning")
+        return redirect(url_for("views.home"), 400)
 
     # create a user in your db with the info above
     # HACK: placeholder password before user updates it
@@ -104,7 +109,14 @@ def authorize_google():
     if not User.get_by_email(users_email):
         User.create(unique_id, users_name, users_email, users_password, users_picture)
 
-    log_message = f"{users_name} successfully logged in with google"
+    message = (
+        f"Congratulations {users_name}! you have successfully logged in with google"
+    )
+    flash(message, category="success")
+    log_message = (
+        f"{users_name} of id: {unique_id} successfully logged in with their google"
+    )
     logger.info(log_message)
     login_user(user)
+
     return redirect(url_for("views.dashboard", user=current_user))
