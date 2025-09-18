@@ -1,3 +1,5 @@
+import uuid
+
 from flask import Flask, Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,12 +13,13 @@ auth = Blueprint("auth", __name__)
 @auth.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        id = uuid.uuid4()
         email = request.form.get("email")
         username = request.form.get("username")
         password = request.form.get("password")
 
         # search for user in db
-        user = User.query.filter_by(username=username).first()
+        user = User.get(email)
 
         if user:
             message = "User already exists! Try again?"
@@ -24,8 +27,8 @@ def register():
             logger.warning(log_message)
             flash(message, category="danger")
         else:
-            new_user = User.create(
-                id_="1232",
+            new_user = User(
+                id_=id,
                 username=username,
                 email=email,
                 password=generate_password_hash(password),
@@ -34,11 +37,13 @@ def register():
             message = (
                 f"Congratulations {username}! You have successfully created an account."
             )
-            log_message = f"{username} successfully created new user account of id:{new_user.id}"
+            log_message = (
+                f"{username} successfully created new user account of id:{new_user.id}"
+            )
             logger.info(log_message)
             flash(message, category="success")
 
-            User.create(id,username,email,profile_pic,password)
+            User.create(id, username, email, profile_pic, password)
             login_user(new_user)
             return redirect(url_for("views.dashboard"))
 

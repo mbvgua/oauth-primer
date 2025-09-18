@@ -1,0 +1,16 @@
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
+# implement logging
+# levels = debug(10),info(20),warning(30),error(40),critical(50)
+# disable werkzeug logging. Too much
+logging.getLogger("werkzeug").disabled = True
+logging.basicConfig(
+    filename="oauth.log",
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(threadName)s : %(module)s >>> %(message)s",
+    datefmt="%B %d, %Y %H:%M:%S %Z",
+)

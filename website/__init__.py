@@ -4,7 +4,7 @@ import logging
 
 # third party libraries
 from flask import Flask
-from flask_login import  LoginManager
+from flask_login import LoginManager
 from dotenv import load_dotenv
 import sqlite3
 
@@ -14,11 +14,6 @@ from .models import User
 
 load_dotenv()
 logger = logging.getLogger(__name__)
-# create_database
-try:
-    init_db_command()
-except sqlite3.OperationalError:
-    print("An error occurred while creating the database!")
 
 
 def create_app():
@@ -67,11 +62,10 @@ def create_app():
     return app
 
 
-# def create_database():
-#     """
-#     create the sqlite db
-#     """
-#     try:
-#         init_db_command()
-#     except sqlite3.OperationalError:
-#         print("An error occurred while creating the database!")
+# create_database
+# moved to the bottom since app wont run if its at the top
+# also removed it from the function as app says to much recursion
+try:
+    init_db_command()
+except sqlite3.OperationalError:
+    print("An error occurred while creating the database!")
