@@ -13,7 +13,7 @@ auth = Blueprint("auth", __name__)
 @auth.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        id = uuid.uuid4()
+        id = str(uuid.uuid4())
         email = request.form.get("email")
         username = request.form.get("username")
         password = request.form.get("password")
@@ -28,9 +28,7 @@ def register():
             flash(message, category="danger")
         else:
             # HACK: dummy profile pic
-            profile_pic = (
-                "https://imgs.search.brave.com/oevy2BhEY18zo9UPsMRKodku248XaHo-G0l7a5LcVmg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzYyLzAx/LzBkLzYyMDEwZDg0/OGI3OTBhMjMzNmQx/NTQyZmNkYTUxNzg5/LmpwZw",
-            )
+            profile_pic = "https://imgs.search.brave.com/oevy2BhEY18zo9UPsMRKodku248XaHo-G0l7a5LcVmg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzYyLzAx/LzBkLzYyMDEwZDg0/OGI3OTBhMjMzNmQx/NTQyZmNkYTUxNzg5/LmpwZw"
 
             new_user = User(
                 id_=id,
@@ -48,7 +46,7 @@ def register():
             logger.info(log_message)
             flash(message, category="success")
 
-            User.create(id, username, email, profile_pic, password)
+            User.create(id, username, email, generate_password_hash(password), profile_pic)
             login_user(new_user)
             return redirect(url_for("views.dashboard"))
 
