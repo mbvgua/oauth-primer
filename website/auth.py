@@ -19,7 +19,7 @@ def register():
         password = request.form.get("password")
 
         # search for user in db
-        user = User.get(email)
+        user = User.get_by_email(email)
 
         if user:
             message = "User already exists! Try again?"
@@ -27,12 +27,17 @@ def register():
             logger.warning(log_message)
             flash(message, category="danger")
         else:
+            # HACK: dummy profile pic
+            profile_pic = (
+                "https://imgs.search.brave.com/oevy2BhEY18zo9UPsMRKodku248XaHo-G0l7a5LcVmg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzYyLzAx/LzBkLzYyMDEwZDg0/OGI3OTBhMjMzNmQx/NTQyZmNkYTUxNzg5/LmpwZw",
+            )
+
             new_user = User(
                 id_=id,
                 username=username,
                 email=email,
                 password=generate_password_hash(password),
-                profile_pic="https://imgs.search.brave.com/oevy2BhEY18zo9UPsMRKodku248XaHo-G0l7a5LcVmg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzYyLzAx/LzBkLzYyMDEwZDg0/OGI3OTBhMjMzNmQx/NTQyZmNkYTUxNzg5/LmpwZw",
+                profile_pic=profile_pic,
             )
             message = (
                 f"Congratulations {username}! You have successfully created an account."
@@ -59,7 +64,7 @@ def login():
         password = request.form.get("password")
 
         # search for user in db
-        user = User.get(email)
+        user = User.get_by_email(email)
         if user:
             if check_password_hash(user.password, password):
                 message = f"Congratulations {username}! You have successfully logged in to your account."

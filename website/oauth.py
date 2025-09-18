@@ -2,7 +2,7 @@ import os
 import json
 
 from flask import Blueprint, render_template, session, url_for, redirect, request
-from flask_login import login_user
+from flask_login import current_user, login_user
 from oauthlib.oauth2 import WebApplicationClient
 import requests
 from dotenv import load_dotenv
@@ -101,10 +101,10 @@ def authorize_google():
     )
 
     # check if user exists in db
-    if not User.get(users_email):
+    if not User.get_by_email(users_email):
         User.create(unique_id, users_name, users_email, users_password, users_picture)
 
     log_message = f"{users_name} successfully logged in with google"
     logger.info(log_message)
     login_user(user)
-    return redirect(url_for("views.dashboard"))
+    return redirect(url_for("views.dashboard", user=current_user))

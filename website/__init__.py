@@ -46,7 +46,7 @@ def create_app():
         takes in user_id string and returns corresponding user object.
         else none is returned
         """
-        return User.get(user_id)
+        return User.get_by_id(user_id)
 
     # implement logging
     # levels = debug(10),info(20),warning(30),error(40),critical(50)
@@ -59,13 +59,12 @@ def create_app():
         datefmt="%B %d, %Y %H:%M:%S %Z",
     )
 
+    from . import db
+
+    try:
+        db.init_app(app)
+    except sqlite3.OperationalError as e:
+        print("An error occurred while creating the database!")
+        print(e)
+
     return app
-
-
-# create_database
-# moved to the bottom since app wont run if its at the top
-# also removed it from the function as app says to much recursion
-try:
-    init_db_command()
-except sqlite3.OperationalError:
-    print("An error occurred while creating the database!")

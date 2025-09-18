@@ -12,28 +12,47 @@ class User(UserMixin):
         self.password = password
         self.profile_pic = profile_pic
 
-        @staticmethod
-        def get(user_email):
-            db = get_db()
-            user = db.execute(
-                "SELECT * FROM users WHERE email=?;", (user_email).fetchone()
-            )
-            if not user:
-                return None
+    @staticmethod
+    def get_by_email(user_email):
+        db = get_db()
+        user = db.execute(
+            "SELECT * FROM users WHERE email=?;", (user_email,)
+        ).fetchone()
+        if not user:
+            return None
 
-            user = User(
-                id_=user[0],
-                username=user[1],
-                email=user[3],
-                password=user[4],
-                profile_pic=user[5],
-            )
-            return user
+        user = User(
+            id_=user[0],
+            username=user[1],
+            email=user[2],
+            password=user[3],
+            profile_pic=user[4],
+        )
+        return user
 
-        @staticmethod
-        def create(id_, username, email, password, profile_pic):
-            db = get_db()
-            db.execute(
-                "INSERT INTO users(id,username,email,password,profile_pic) VALUES (?,?,?,?,?);"
-            )
-            db.commit()
+    @staticmethod
+    def get_by_id(user_id):
+        db = get_db()
+        user = db.execute(
+            "SELECT * FROM users WHERE id=?;", (user_id,)
+        ).fetchone()
+        if not user:
+            return None
+
+        user = User(
+            id_=user[0],
+            username=user[1],
+            email=user[2],
+            password=user[3],
+            profile_pic=user[4],
+        )
+        return user
+
+    @staticmethod
+    def create(id_, username, email, password, profile_pic):
+        db = get_db()
+        db.execute(
+            "INSERT INTO users(id,username,email,password,profile_pic) VALUES (?,?,?,?,?);",
+            (id_, username, email, password, profile_pic),
+        )
+        db.commit()
