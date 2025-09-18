@@ -31,7 +31,10 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
-
-> [!WARNING]
+> [!NOTE]
+>
+> You will need to run the `python app.py` command twice! The first one will create the database, then the second one creates the server.
+>
+> The server will be running on address: `https://127.0.0.1:5000/`, due to the `openSSL` module.
 >
 > For a smooth worlflow as demonstarted above, First ensure that you have `python 3.*` and `pip` installed.

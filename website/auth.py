@@ -1,8 +1,9 @@
+import uuid
+
 from flask import Flask, Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
-from . import db
 from . import logger
 
 auth = Blueprint("auth", __name__)
@@ -12,12 +13,13 @@ auth = Blueprint("auth", __name__)
 @auth.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        id = str(uuid.uuid4())
         email = request.form.get("email")
         username = request.form.get("username")
         password = request.form.get("password")
 
         # search for user in db
-        user = User.query.filter_by(username=username).first()
+        user = User.get_by_email(email)
 
         if user:
             message = "User already exists! Try again?"
@@ -25,20 +27,26 @@ def register():
             logger.warning(log_message)
             flash(message, category="danger")
         else:
+            # HACK: dummy profile pic
+            profile_pic = "https://imgs.search.brave.com/oevy2BhEY18zo9UPsMRKodku248XaHo-G0l7a5LcVmg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzYyLzAx/LzBkLzYyMDEwZDg0/OGI3OTBhMjMzNmQx/NTQyZmNkYTUxNzg5/LmpwZw"
+
             new_user = User(
+                id_=id,
                 username=username,
                 email=email,
                 password=generate_password_hash(password),
+                profile_pic=profile_pic,
             )
             message = (
                 f"Congratulations {username}! You have successfully created an account."
             )
-            log_message = f"{username} successfully created new user account of id:{new_user.id}"
+            log_message = (
+                f"{username} successfully created new user account of id:{new_user.id}"
+            )
             logger.info(log_message)
             flash(message, category="success")
 
-            db.session.add(new_user)
-            db.session.commit()
+            User.create(id, username, email, generate_password_hash(password), profile_pic)
             login_user(new_user)
             return redirect(url_for("views.dashboard"))
 
@@ -54,7 +62,7 @@ def login():
         password = request.form.get("password")
 
         # search for user in db
-        user = User.query.filter_by(username=username).first()
+        user = User.get_by_email(email)
         if user:
             if check_password_hash(user.password, password):
                 message = f"Congratulations {username}! You have successfully logged in to your account."
@@ -82,4 +90,4 @@ def logout():
     log_message = f"{current_user.username} has logged out of their account"
     logger.info(log_message)
     logout_user()
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("views.home"))

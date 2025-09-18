@@ -8,6 +8,21 @@
 
     <h1> Welcome {{user.username}}!! </h1>
     <h2> You made it to the dashboard. That means you logged in successfully.</h2>
+    <div>
+
+    <div class="ml-3 w-100">
+
+        <p class="fw-bold"> Profile Picture: </p>
+        <div class="image">
+            <img src="{{user.profile_pic}}" class="rounded" width="155" alt="Profile Pic">
+        </div>
+
+        <h4 class="mb-0 mt-0"> <span class="fw-bold"> Username: </span> {{user.username.capitalize()}}</h4>
+        <p> <span class="fw-bold"> Email: </span> {{user.email}} </p>
+
+        </div>
+
+    </div>
 
 {% elif current_user.is_anonymous %}
 
