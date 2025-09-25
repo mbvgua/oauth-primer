@@ -1,0 +1,6 @@
+# ignore the virtual env
+.venv
+
+# all python build files
+__pycache__
+*.pyc
