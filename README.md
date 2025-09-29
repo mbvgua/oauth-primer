@@ -40,6 +40,8 @@ $ source .venv/bin/activate
 (.venv)$ pip install -r requirements.txt
 ```
 
+4. Move the [`.env-example`](./env-example) file and copy the environment variables. These will help you setup your own `.env` varibales that ae required for setting up and running the application.
+
 4. Finally, start the python server and navigate to `https://127.0.0.1:5000/` where you'll find the server running:
 
 ```bash
